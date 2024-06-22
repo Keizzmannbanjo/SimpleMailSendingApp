@@ -1,8 +1,6 @@
-﻿using MailKit.Net.Smtp;
-using MailKit.Security;
-using Microsoft.AspNetCore.Mvc;
-using MimeKit;
-using MimeKit.Text;
+﻿using Microsoft.AspNetCore.Mvc;
+using SimpleMailSendingApp.Dtos;
+using SimpleMailSendingApp.Services;
 
 namespace SimpleMailSendingApp.Controllers
 {
@@ -10,21 +8,16 @@ namespace SimpleMailSendingApp.Controllers
     [ApiController]
     public class EmailController : ControllerBase
     {
-        [HttpPost]
-        public ActionResult SendEmail(string body)
+        private readonly IEmailService emailService;
+
+        public EmailController(IEmailService emailService)
         {
-            var email = new MimeMessage();
-            email.From.Add(MailboxAddress.Parse("deangelo.sanford68@ethereal.email"));
-            email.To.Add(MailboxAddress.Parse("deangelo.sanford68@ethereal.email"));
-            email.Subject = "Test Email";
-            email.Body = new TextPart(TextFormat.Html) { Text = body };
-
-            using var smtp = new SmtpClient();
-            smtp.Connect("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
-            smtp.Authenticate("deangelo.sanford68@ethereal.email", "gducAqXFdEJj5FB4RP");
-            smtp.Send(email);
-            smtp.Disconnect(true);
-
+            this.emailService = emailService;
+        }
+        [HttpPost]
+        public ActionResult SendEmail(SendEmailDto request)
+        {
+            emailService.SendEmail(request);
             return Ok("Message Sent");
         }
     }
